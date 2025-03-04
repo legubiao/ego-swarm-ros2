@@ -1,5 +1,5 @@
-#ifndef _POLYNOMIAL_TRAJ_H
-#define _POLYNOMIAL_TRAJ_H
+#ifndef POLYNOMIAL_TRAJ_H
+#define POLYNOMIAL_TRAJ_H
 
 #include <Eigen/Eigen>
 #include <vector>
@@ -8,7 +8,6 @@ using std::vector;
 
 class PolynomialTraj
 {
-private:
   vector<double> times;       // time of each segment
   vector<vector<double>> cxs; // coefficient of x of each segment, from n-1 -> 0
   vector<vector<double>> cys; // coefficient of y of each segment

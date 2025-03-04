@@ -1,5 +1,5 @@
-#ifndef _GRADIENT_DESCENT_OPT_H_
-#define _GRADIENT_DESCENT_OPT_H_
+#ifndef GRADIENT_DESCENT_OPT_H_
+#define GRADIENT_DESCENT_OPT_H_
 
 #include <iostream>
 #include <vector>
@@ -27,7 +27,7 @@ public:
     variable_num_ = v_num;
     objfun_ = objf;
     f_data_ = f_data;
-  };
+  }
 
   void set_maxiter(int limit) { iter_limit_ = limit; }
   void set_maxeval(int limit) { invoke_limit_ = limit; }

@@ -1,17 +1,13 @@
-#ifndef _PLANNING_VISUALIZATION_H_
-#define _PLANNING_VISUALIZATION_H_
+#ifndef PLANNING_VISUALIZATION_H_
+#define PLANNING_VISUALIZATION_H_
 
 #include <Eigen/Eigen>
-#include <algorithm>
 // #include <bspline_opt/uniform_bspline.h>
-#include <iostream>
 // #include <bspline_opt/polynomial_traj.h>
 #include <rclcpp/rclcpp.hpp>
 #include <vector>
 #include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
-#include <geometry_msgs/msg/point.hpp>
-#include <stdlib.h>
 
 using std::vector;
 namespace ego_planner

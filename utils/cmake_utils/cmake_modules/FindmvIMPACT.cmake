@@ -23,7 +23,7 @@ endmacro(mvIMPACT_REPORT_NOT_FOUND)
 
 # Search user-installed locations first, so that we prefer user installs
 # to system installs where both exist.
-get_filename_component(BLUEFOX2_DIR ${CMAKE_CURRENT_SOURCE_DIR} REALPATH)
+get_filename_component(BLUEFOX2_DIR . REALPATH)
 list(APPEND mvIMPACT_CHECK_INCLUDE_DIRS
     /opt/mvIMPACT_acquire
     /opt/mvIMPACT_Acquire

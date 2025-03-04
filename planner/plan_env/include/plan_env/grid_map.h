@@ -1,5 +1,5 @@
 #ifndef GRID_MAP_H
-#define _GRID_MAP_H
+#define GRID_MAP_H
 
 #include <Eigen/Eigen>
 #include <Eigen/StdVector>
@@ -10,23 +10,17 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <queue>
 #include <rclcpp/rclcpp.hpp>
-#include <tuple>
-#include <visualization_msgs/msg/marker.hpp>
 
-#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/sync_policies/exact_time.h>
-#include <message_filters/time_synchronizer.h>
 
 #include <plan_env/raycast.h>
 
 #define logit(x) (log((x) / (1 - (x))))
-
-using namespace std;
 
 // voxel hashing
 template <typename T>
@@ -55,7 +49,7 @@ struct MappingParameters
     Eigen::Vector3d local_update_range_;
     double resolution_, resolution_inv_;
     double obstacles_inflation_;
-    string frame_id_;
+    std::string frame_id_;
     int pose_type_;
 
     /* camera parameters */
@@ -121,15 +115,15 @@ struct MappingData
 
     // depth image projected point cloud
 
-    vector<Eigen::Vector3d> proj_points_;
+    std::vector<Eigen::Vector3d> proj_points_;
     int proj_points_cnt;
 
     // flag buffers for speeding up raycasting
 
-    vector<short> count_hit_, count_hit_and_miss_;
-    vector<char> flag_traverse_, flag_rayend_;
+    std::vector<short> count_hit_, count_hit_and_miss_;
+    std::vector<char> flag_traverse_, flag_rayend_;
     char raycast_num_;
-    queue<Eigen::Vector3i> cache_voxel_;
+    std::queue<Eigen::Vector3i> cache_voxel_;
 
     // range of updating grid
 
@@ -146,13 +140,9 @@ struct MappingData
 class GridMap
 {
 public:
-    GridMap()
-    {
-    }
+    GridMap() = default;
 
-    ~GridMap()
-    {
-    }
+    ~GridMap() = default;
 
     enum
     {
@@ -194,7 +184,7 @@ public:
     bool hasDepthObservation();
     bool odomValid();
     void getRegion(Eigen::Vector3d& ori, Eigen::Vector3d& size);
-    inline double getResolution();
+    inline double getResolution() const;
     Eigen::Vector3d getOrigin();
     int getVoxelNum();
     bool getOdomDepthTimeout() { return md_.flag_depth_odom_timeout_; }
@@ -224,7 +214,7 @@ private:
     void raycastProcess();
     void clearAndInflateLocalMap();
 
-    inline void inflatePoint(const Eigen::Vector3i& pt, int step, vector<Eigen::Vector3i>& pts);
+    inline void inflatePoint(const Eigen::Vector3i& pt, int step, std::vector<Eigen::Vector3i>& pts);
     int setCacheOccupancy(Eigen::Vector3d pos, int occ);
     Eigen::Vector3d closetPointInMap(const Eigen::Vector3d& pt, const Eigen::Vector3d& camera_pt);
 
@@ -236,8 +226,8 @@ private:
     SyncPolicyImageOdom;
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::Image, geometry_msgs::msg::PoseStamped>
     SyncPolicyImagePose;
-    typedef shared_ptr<message_filters::Synchronizer<SyncPolicyImagePose>> SynchronizerImagePose;
-    typedef shared_ptr<message_filters::Synchronizer<SyncPolicyImageOdom>> SynchronizerImageOdom;
+    typedef std::shared_ptr<message_filters::Synchronizer<SyncPolicyImagePose>> SynchronizerImagePose;
+    typedef std::shared_ptr<message_filters::Synchronizer<SyncPolicyImageOdom>> SynchronizerImageOdom;
 
     rclcpp::Node::SharedPtr node_;
     std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::Image>> depth_sub_;
@@ -257,9 +247,9 @@ private:
     rclcpp::TimerBase::SharedPtr vis_timer_;
 
     //
-    uniform_real_distribution<double> rand_noise_;
-    normal_distribution<double> rand_noise2_;
-    default_random_engine eng_;
+    std::uniform_real_distribution<double> rand_noise_;
+    std::normal_distribution<double> rand_noise2_;
+    std::default_random_engine eng_;
 };
 
 /* ============================== definition of inline function
@@ -278,9 +268,9 @@ inline int GridMap::toAddress(int& x, int& y, int& z)
 inline void GridMap::boundIndex(Eigen::Vector3i& id)
 {
     Eigen::Vector3i id1;
-    id1(0) = max(min(id(0), mp_.map_voxel_num_(0) - 1), 0);
-    id1(1) = max(min(id(1), mp_.map_voxel_num_(1) - 1), 0);
-    id1(2) = max(min(id(2), mp_.map_voxel_num_(2) - 1), 0);
+    id1(0) = std::max(std::min(id(0), mp_.map_voxel_num_(0) - 1), 0);
+    id1(1) = std::max(std::min(id(1), mp_.map_voxel_num_(1) - 1), 0);
+    id1(2) = std::max(std::min(id(2), mp_.map_voxel_num_(2) - 1), 0);
     id = id1;
 }
 
@@ -334,7 +324,7 @@ inline void GridMap::setOccupancy(Eigen::Vector3d pos, double occ)
 {
     if (occ != 1 && occ != 0)
     {
-        cout << "occ value error!" << endl;
+        std::cout << "occ value error!" << std::endl;
         return;
     }
 
@@ -420,7 +410,7 @@ inline void GridMap::indexToPos(const Eigen::Vector3i& id, Eigen::Vector3d& pos)
         pos(i) = (id(i) + 0.5) * mp_.resolution_ + mp_.map_origin_(i);
 }
 
-inline void GridMap::inflatePoint(const Eigen::Vector3i& pt, int step, vector<Eigen::Vector3i>& pts)
+inline void GridMap::inflatePoint(const Eigen::Vector3i& pt, int step, std::vector<Eigen::Vector3i>& pts)
 {
     int num = 0;
     /* ---------- + shape inflate ---------- */
@@ -450,6 +440,6 @@ inline void GridMap::inflatePoint(const Eigen::Vector3i& pt, int step, vector<Ei
             }
 }
 
-inline double GridMap::getResolution() { return mp_.resolution_; }
+inline double GridMap::getResolution() const { return mp_.resolution_; }
 
 #endif

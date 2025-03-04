@@ -4,7 +4,7 @@
 
 // #define current_img_ md_.depth_image_[image_cnt_ & 1]
 // #define last_img_ md_.depth_image_[!(image_cnt_ & 1)]
-
+using namespace std;
 void GridMap::initMap(rclcpp::Node::SharedPtr node)
 {
     node_ = std::move(node);

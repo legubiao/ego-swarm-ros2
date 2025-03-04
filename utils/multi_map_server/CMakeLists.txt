@@ -50,7 +50,7 @@ if(BUILD_TESTING)
 endif()
 
 include_directories(
-  include  
+        include
   ${ARMADILLO_INCLUDE_DIRS}
 )
 

@@ -1,74 +1,62 @@
 cmake_minimum_required(VERSION 3.8)
 project(traj_utils)
 
+if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif ()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE "Release")
-
-add_compile_options(-Wall -O3 -g)
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(visualization_msgs REQUIRED)
-find_package(builtin_interfaces REQUIRED)
+set(dependencies
+        rclcpp
+        std_msgs
+        visualization_msgs
+        geometry_msgs
+        builtin_interfaces
+)
+foreach (Dependency IN ITEMS ${dependencies})
+    find_package(${Dependency} REQUIRED)
+endforeach ()
 find_package(rosidl_default_generators REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
 
 rosidl_generate_interfaces(traj_utils
-  "msg/Bspline.msg"
-  "msg/DataDisp.msg"
-  "msg/MultiBsplines.msg"
-
-  DEPENDENCIES std_msgs geometry_msgs rclcpp builtin_interfaces
+        "msg/Bspline.msg"
+        "msg/DataDisp.msg"
+        "msg/MultiBsplines.msg"
+        DEPENDENCIES ${dependencies}
 )
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
-
-include_directories( 
-    SYSTEM 
-    include 
-    ${Eigen3_INCLUDE_DIRS} 
-    ${PCL_INCLUDE_DIRS}
+add_library(${PROJECT_NAME}_lib SHARED
+        src/planning_visualization.cpp
+        src/polynomial_traj.cpp
+)
+target_include_directories(${PROJECT_NAME}_lib PUBLIC
+        ${Eigen3_INCLUDE_DIRS}
+        ${PCL_INCLUDE_DIRS}
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+ament_target_dependencies(
+        ${PROJECT_NAME}_lib PUBLIC
+        ${dependencies} Eigen3 PCL
 )
 
-ament_export_include_directories(include)
-
-link_directories(${PCL_LIBRARY_DIRS})
-
-add_library( traj_utils_lib SHARED
-    src/planning_visualization.cpp 
-    src/polynomial_traj.cpp 
-    )
-
-ament_target_dependencies(traj_utils_lib std_msgs geometry_msgs visualization_msgs rclcpp Eigen3 PCL)
-
-install(TARGETS traj_utils_lib
+install(TARGETS ${PROJECT_NAME}_lib
+        EXPORT export_${PROJECT_NAME}_lib
         DESTINATION lib
 )
-
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}
+install(DIRECTORY include/
+        DESTINATION include/${PROJECT_NAME}
 )
 
-ament_export_libraries(traj_utils_lib)
+ament_export_targets(export_${PROJECT_NAME}_lib HAS_LIBRARY_TARGET)
+ament_export_dependencies(${dependencies} Eigen3 PCL)
 
 ament_package()

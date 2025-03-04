@@ -33,7 +33,7 @@ if(BUILD_TESTING)
 endif()
 
 include_directories(
-  include
+        include
   ${EIGEN3_INCLUDE_DIR}
 )
 

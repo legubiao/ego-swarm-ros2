@@ -4,7 +4,7 @@
 #define RED "\033[31m"
 
 GradientDescentOptimizer::RESULT
-GradientDescentOptimizer::optimize(Eigen::VectorXd &x_init_optimal, double &opt_f)
+GradientDescentOptimizer::optimize(Eigen::VectorXd& x_init_optimal, double& opt_f)
 {
     if (min_grad_ < 1e-10)
     {
@@ -17,7 +17,7 @@ GradientDescentOptimizer::optimize(Eigen::VectorXd &x_init_optimal, double &opt_
         return FAILED;
     }
 
-    void *f_data = f_data_;
+    void* f_data = f_data_;
     int iter = 2;
     int invoke_count = 2;
     bool force_return;
@@ -61,7 +61,8 @@ GradientDescentOptimizer::optimize(Eigen::VectorXd &x_init_optimal, double &opt_
                 if (force_return)
                     return RETURN_BY_ORDER;
                 alpha *= 0.5;
-            } while (cost_k > cost_kp1 - 1e-4 * alpha * grad_kp1.transpose() * grad_kp1); // Armijo condition
+            }
+            while (cost_k > cost_kp1 - 1e-4 * alpha * grad_kp1.transpose() * grad_kp1); // Armijo condition
 
             if (grad_k.norm() < min_grad_)
             {
@@ -79,7 +80,8 @@ GradientDescentOptimizer::optimize(Eigen::VectorXd &x_init_optimal, double &opt_
                 if (force_return)
                     return RETURN_BY_ORDER;
                 alpha *= 0.5;
-            } while (cost_kp1 > cost_k - 1e-4 * alpha * grad_k.transpose() * grad_k); // Armijo condition
+            }
+            while (cost_kp1 > cost_k - 1e-4 * alpha * grad_k.transpose() * grad_k); // Armijo condition
 
             if (grad_kp1.norm() < min_grad_)
             {

@@ -11,7 +11,7 @@ AStar::~AStar()
                 delete GridNodeMap_[i][j][k];
 }
 
-void AStar::initGridMap(GridMap::Ptr occ_map, const Eigen::Vector3i pool_size)
+void AStar::initGridMap(GridMap::Ptr occ_map, const Vector3i pool_size)
 {
     POOL_SIZE_ = pool_size;
     CENTER_IDX_ = pool_size / 2;
@@ -79,7 +79,7 @@ vector<GridNodePtr> AStar::retrievePath(GridNodePtr current)
     vector<GridNodePtr> path;
     path.push_back(current);
 
-    while (current->cameFrom != NULL)
+    while (current->cameFrom != nullptr)
     {
         current = current->cameFrom;
         path.push_back(current);
@@ -146,15 +146,15 @@ bool AStar::AstarSearch(const double step_size, Vector3d start_pt, Vector3d end_
     std::priority_queue<GridNodePtr, std::vector<GridNodePtr>, NodeComparator> empty;
     openSet_.swap(empty);
 
-    GridNodePtr neighborPtr = NULL;
-    GridNodePtr current = NULL;
+    GridNodePtr neighborPtr = nullptr;
+    GridNodePtr current = nullptr;
 
     startPtr->index = start_idx;
     startPtr->rounds = rounds_;
     startPtr->gScore = 0;
     startPtr->fScore = getHeu(startPtr, endPtr);
     startPtr->state = GridNode::OPENSET; //put start node in open set
-    startPtr->cameFrom = NULL;
+    startPtr->cameFrom = nullptr;
     openSet_.push(startPtr); //put start in open set
 
     endPtr->index = end_idx;

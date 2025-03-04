@@ -9,7 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+set(CMAKE_MODULE_PATH cmake)
 
 file(GLOB CMAKE_UILTS_FILES cmake/*.cmake)
 

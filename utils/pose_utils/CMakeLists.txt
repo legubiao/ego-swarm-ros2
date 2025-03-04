@@ -29,7 +29,7 @@ if(BUILD_TESTING)
 endif()
 
 include_directories(
-  include/pose_utils
+        include/pose_utils
   ${ARMADILLO_INCLUDE_DIRS}
 )
 
