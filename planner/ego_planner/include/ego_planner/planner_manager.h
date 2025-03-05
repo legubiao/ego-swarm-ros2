@@ -42,11 +42,11 @@ namespace ego_planner
 
         void initPlanModules(rclcpp::Node::SharedPtr& node, PlanningVisualization::Ptr vis = NULL);
 
-        void deliverTrajToOptimizer(void) { bspline_optimizer_->setSwarmTrajs(&swarm_trajs_buf_); };
+        void deliverTrajToOptimizer() { bspline_optimizer_->setSwarmTrajs(&swarm_trajs_buf_); };
 
-        void setDroneIdtoOpt(void) { bspline_optimizer_->setDroneId(pp_.drone_id); }
+        void setDroneIdtoOpt() { bspline_optimizer_->setDroneId(pp_.drone_id); }
 
-        double getSwarmClearance(void) { return bspline_optimizer_->getSwarmClearance(); }
+        double getSwarmClearance() { return bspline_optimizer_->getSwarmClearance(); }
 
         bool checkCollision(int drone_id);
 

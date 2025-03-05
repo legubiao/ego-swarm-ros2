@@ -2,8 +2,6 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "traj_utils/msg/bspline.hpp"
 #include "quadrotor_msgs/msg/position_command.hpp"
-#include "std_msgs/msg/empty.hpp"
-#include "visualization_msgs/msg/marker.hpp"
 #include <rclcpp/rclcpp.hpp>
 
 rclcpp::Publisher<quadrotor_msgs::msg::PositionCommand>::SharedPtr pos_cmd_pub;

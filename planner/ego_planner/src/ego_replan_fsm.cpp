@@ -1,5 +1,6 @@
 #include <ego_planner/ego_replan_fsm.h>
 
+#include <memory>
 namespace ego_planner
 {
     void EGOReplanFSM::init(rclcpp::Node::SharedPtr& node)
@@ -47,9 +48,9 @@ namespace ego_planner
         }
 
         /* initialize main modules */
-        visualization_.reset(new PlanningVisualization(node_));
+        visualization_ = std::make_shared<PlanningVisualization>(node_);
 
-        planner_manager_.reset(new EGOPlannerManager);
+        planner_manager_ = std::make_unique<EGOPlannerManager>();
 
         planner_manager_->initPlanModules(node_, visualization_);
 
@@ -74,8 +75,8 @@ namespace ego_planner
 
         if (planner_manager_->pp_.drone_id >= 1)
         {
-            string sub_topic_name = string("/drone_") + std::to_string(planner_manager_->pp_.drone_id - 1) + string(
-                "_planning/swarm_trajs");
+            const string sub_topic_name = "/drone_" + std::to_string(planner_manager_->pp_.drone_id - 1) +
+                "_planning/swarm_trajs";
             swarm_trajs_sub_ = node_->create_subscription<traj_utils::msg::MultiBsplines>(
                 sub_topic_name,
                 10,
@@ -91,12 +92,11 @@ namespace ego_planner
         if (planner_manager_->pp_.drone_id <= -1)
         {
             RCLCPP_INFO(node_->get_logger(), "single drone:%d", planner_manager_->pp_.drone_id);
-            pub_topic_name = string("/drone_") + "single" + string("_planning/swarm_trajs");
+            pub_topic_name = "/drone_single_planning/swarm_trajs";
         }
         else
         {
-            pub_topic_name = string("/drone_") + std::to_string(planner_manager_->pp_.drone_id) + string(
-                "_planning/swarm_trajs");
+            pub_topic_name = "/drone_" + std::to_string(planner_manager_->pp_.drone_id) + "_planning/swarm_trajs";
         }
 
         swarm_trajs_pub_ = node_->create_publisher<traj_utils::msg::MultiBsplines>(pub_topic_name, 10);
@@ -114,7 +114,7 @@ namespace ego_planner
         bspline_pub_ = node_->create_publisher<traj_utils::msg::Bspline>("planning/bspline", 10);
         data_disp_pub_ = node_->create_publisher<traj_utils::msg::DataDisp>("planning/data_display", 100);
 
-        if (target_type_ == TARGET_TYPE::MANUAL_TARGET)
+        if (target_type_ == MANUAL_TARGET)
         {
             waypoint_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
                 "/move_base_simple/goal",
@@ -124,7 +124,7 @@ namespace ego_planner
                     this->waypointCallback(msg);
                 });
         }
-        else if (target_type_ == TARGET_TYPE::PRESET_TARGET)
+        else if (target_type_ == PRESET_TARGET)
         {
             trigger_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
                 "/traj_start_trigger",
@@ -138,7 +138,7 @@ namespace ego_planner
             int count = 0;
             while (rclcpp::ok() && count++ < 1000)
             {
-                rclcpp::spin_some(node_);
+                spin_some(node_);
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
 
@@ -146,7 +146,7 @@ namespace ego_planner
 
             while (rclcpp::ok() && (!have_odom_ || !have_trigger_))
             {
-                rclcpp::spin_some(node_);
+                spin_some(node_);
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
 
@@ -214,7 +214,7 @@ namespace ego_planner
             {
                 while (exec_state_ != EXEC_TRAJ)
                 {
-                    rclcpp::spin_some(node_);
+                    spin_some(node_);
                     std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 }
                 changeFSMExecState(REPLAN_TRAJ, "TRIG");
@@ -271,8 +271,8 @@ namespace ego_planner
 
     void EGOReplanFSM::BroadcastBsplineCallback(const std::shared_ptr<const traj_utils::msg::Bspline>& msg)
     {
-        size_t id = msg->drone_id;
-        if ((int)id == planner_manager_->pp_.drone_id)
+        const size_t id = msg->drone_id;
+        if (static_cast<int>(id) == planner_manager_->pp_.drone_id)
             return;
 
         // if (abs((ros::Time::now() - msg->start_time).toSec()) > 0.25)
@@ -417,13 +417,13 @@ namespace ego_planner
             // 计算路径持续时间
             if (msg->traj[i].order % 2)
             {
-                double cutback = (double)msg->traj[i].order / 2 + 1.5;
+                double cutback = static_cast<double>(msg->traj[i].order) / 2 + 1.5;
                 planner_manager_->swarm_trajs_buf_[i].duration_ = msg->traj[i].knots[msg->traj[i].knots.size() -
                     ceil(cutback)];
             }
             else
             {
-                double cutback = (double)msg->traj[i].order / 2 + 1.5;
+                double cutback = static_cast<double>(msg->traj[i].order) / 2 + 1.5;
                 planner_manager_->swarm_trajs_buf_[i].duration_ = (msg->traj[i].knots[msg->traj[i].knots.size() -
                     floor(cutback)] + msg->traj[i].knots[msg->traj[i].knots.size() - ceil(cutback)]) / 2;
             }
@@ -459,7 +459,7 @@ namespace ego_planner
 
     std::pair<int, EGOReplanFSM::FSM_EXEC_STATE> EGOReplanFSM::timesOfConsecutiveStateCalls()
     {
-        return std::pair<int, FSM_EXEC_STATE>(continously_called_times_, exec_state_);
+        return std::pair(continously_called_times_, exec_state_);
     }
 
     void EGOReplanFSM::printFSMExecState()
@@ -868,21 +868,20 @@ namespace ego_planner
         if (startup_pub)
         {
             multi_bspline_msgs_buf_.drone_id_from = planner_manager_->pp_.drone_id; // zx-todo
-            if ((int)multi_bspline_msgs_buf_.traj.size() == planner_manager_->pp_.drone_id + 1)
+            if (static_cast<int>(multi_bspline_msgs_buf_.traj.size()) == planner_manager_->pp_.drone_id + 1)
             {
                 multi_bspline_msgs_buf_.traj.back() = bspline;
             }
-            else if ((int)multi_bspline_msgs_buf_.traj.size() == planner_manager_->pp_.drone_id)
+            else if (static_cast<int>(multi_bspline_msgs_buf_.traj.size()) == planner_manager_->pp_.drone_id)
             {
                 multi_bspline_msgs_buf_.traj.push_back(bspline);
             }
             else
             {
                 RCLCPP_ERROR(node_->get_logger(), "Wrong traj nums and drone_id pair!!! traj.size()=%d, drone_id=%d",
-                             (int)multi_bspline_msgs_buf_.traj.size(), planner_manager_->pp_.drone_id);
+                             static_cast<int>(multi_bspline_msgs_buf_.traj.size()), planner_manager_->pp_.drone_id);
                 // return plan_and_refine_success;
             }
-            // swarm_trajs_pub_.publish(multi_bspline_msgs_buf_);
             swarm_trajs_pub_->publish(multi_bspline_msgs_buf_);
         }
 

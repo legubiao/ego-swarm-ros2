@@ -24,7 +24,6 @@ namespace ego_planner
 {
     class EGOReplanFSM
     {
-    private:
         /* ---------- flag ---------- */
         enum FSM_EXEC_STATE
         {
@@ -86,8 +85,6 @@ namespace ego_planner
         rclcpp::Subscription<traj_utils::msg::Bspline>::SharedPtr broadcast_bspline_sub_;
         rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr trigger_sub_;
 
-        // rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr replan_pub_;
-        // rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr new_pub_;
         rclcpp::Publisher<traj_utils::msg::Bspline>::SharedPtr bspline_pub_;
         rclcpp::Publisher<traj_utils::msg::DataDisp>::SharedPtr data_disp_pub_;
         rclcpp::Publisher<traj_utils::msg::MultiBsplines>::SharedPtr swarm_trajs_pub_;
@@ -101,11 +98,11 @@ namespace ego_planner
 
         /* return value: std::pair< Times of the same state be continuously called, current continuously called state > */
         void changeFSMExecState(FSM_EXEC_STATE new_state, string pos_call);
-        std::pair<int, EGOReplanFSM::FSM_EXEC_STATE> timesOfConsecutiveStateCalls();
+        std::pair<int, FSM_EXEC_STATE> timesOfConsecutiveStateCalls();
         void printFSMExecState();
 
         void readGivenWps();
-        void planNextWaypoint(const Eigen::Vector3d next_wp);
+        void planNextWaypoint(Eigen::Vector3d next_wp);
         void getLocalTarget();
 
         /* ROS functions */
