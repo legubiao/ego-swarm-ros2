@@ -15,9 +15,6 @@
   <depend>nav_msgs</depend>
   <depend>std_msgs</depend>
 
-  <build_depend>Eigen3</build_depend>
-  <exec_depend>Eigen3</exec_depend>
-
   <member_of_group>rosidl_interface_packages</member_of_group>
 
   <test_depend>ament_lint_auto</test_depend>
