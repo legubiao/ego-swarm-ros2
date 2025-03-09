@@ -63,3 +63,9 @@ Choose from one of the followings:
 ```
 ros2 launch ego_planner single_run_in_sim.launch.py use_mockamap:=True use_dynamic:=False
 ```
+
+## 3. Run in Gazebo Simulation
+```bash
+cd ~/ego_ws/src/ego-swarm-ros2
+git submodule update --init --recursive
+```

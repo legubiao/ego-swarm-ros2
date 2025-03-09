@@ -16,6 +16,7 @@ set(dependencies
         rclcpp
         px4_msgs
         quadrotor_msgs
+        Boost
 )
 foreach (Dependency IN ITEMS ${dependencies})
     find_package(${Dependency} REQUIRED)
@@ -27,15 +28,25 @@ add_library(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC
+        ${Boost_INCLUDE_DIRS}
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
         "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 
-ament_target_dependencies(${PROJECT_NAME} ${dependencies})
+ament_target_dependencies(${PROJECT_NAME} ${dependencies} Boost)
+
+add_executable(${PROJECT_NAME}_node src/PX4EgoAgent.cpp)
+target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME})
 
 install(
         TARGETS ${PROJECT_NAME}
         EXPORT export_${PROJECT_NAME}
         DESTINATION lib
+)
+
+install(
+        TARGETS
+        ${PROJECT_NAME}_node
+        DESTINATION lib/${PROJECT_NAME}
 )
 
 install(
